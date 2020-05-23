@@ -1,0 +1,6 @@
+framework module Pods_Bus_Tracker {
+  umbrella header "Pods-Bus Tracker-umbrella.h"
+
+  export *
+  module * { export * }
+}

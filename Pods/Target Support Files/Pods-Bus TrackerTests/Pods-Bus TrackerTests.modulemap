@@ -1,0 +1,6 @@
+framework module Pods_Bus_TrackerTests {
+  umbrella header "Pods-Bus TrackerTests-umbrella.h"
+
+  export *
+  module * { export * }
+}
