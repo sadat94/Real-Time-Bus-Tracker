@@ -1,5 +1,5 @@
 # Uncomment the next line to define a global platform for your project
-# platform :ios, '9.0'
+platform :ios, '13.0'
 
 target 'Bus Tracker' do
   # Comment the next line if you don't want to use dynamic frameworks
@@ -12,14 +12,5 @@ target 'Bus Tracker' do
 	pod 'Firebase/Auth'
 	pod 'Firebase/Storage'
 	pod 'GeoFire', '>= 1.1'
-
-  target 'Bus TrackerTests' do
-    inherit! :search_paths
-    # Pods for testing
-  end
-
-  target 'Bus TrackerUITests' do
-    # Pods for testing
-  end
 
 end
