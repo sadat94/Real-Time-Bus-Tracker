@@ -144,6 +144,9 @@ class LocationInputView: UIView {
     }
 }
 
+
+// MARK: UITextFieldDelegate
+
 extension LocationInputView: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         guard let query = textField.text else { return false }

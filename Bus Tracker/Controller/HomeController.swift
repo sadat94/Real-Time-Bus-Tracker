@@ -38,7 +38,7 @@ class HomeController: UIViewController {
         checkIfUserIsLoggedIn()
         enableLocationServices()
         
-        signOut()
+    //    signOut()
         
     }
     
@@ -196,6 +196,10 @@ class HomeController: UIViewController {
 
 }
 
+
+    //MARK: - Map Helper Functions
+
+
     //MARK: - MkMap
 
 extension HomeController: MKMapViewDelegate {
@@ -267,7 +271,7 @@ extension HomeController: LocationInputViewDelegate {
     }
 
     func executeSearch(query: String) {
-
+        print("DEBUG: Query is \(query)")
     }
 
 
