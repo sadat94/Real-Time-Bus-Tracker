@@ -2,7 +2,7 @@
 //  SceneDelegate.swift
 //  Bus Tracker
 //
-//  Created by Armin Shamafi Nusrat on 5/12/20.
+//  Created by Sadat Safuan on 5/12/20.
 //  Copyright © 2020 Sadat Safuan. All rights reserved.
 //
 

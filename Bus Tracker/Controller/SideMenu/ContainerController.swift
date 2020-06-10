@@ -33,7 +33,7 @@ class ContainerController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         checkIfUserIsLoggedIn()
-        signOut()
+   //     signOut()
     }
     
     override var prefersStatusBarHidden: Bool {

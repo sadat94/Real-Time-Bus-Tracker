@@ -186,7 +186,7 @@ class HomeController: UIViewController {
     }
     
     func fetchDrivers() {
-        guard let location = locationManager?.location else { return }
+        guard let location = locationManager.location else { return }
         PassengerService.shared.fetchDrivers(location: location) { (driver) in
             guard let coordinate = driver.location?.coordinate else { return }
             let annotation = DriverAnnotation(uid: driver.uid, coordinate: coordinate)
@@ -417,7 +417,7 @@ private extension HomeController {
     }
     
     func centerMapOnUserLocation() {
-        guard let coordinate = locationManager?.location?.coordinate else { return }
+        guard let coordinate = locationManager.location?.coordinate else { return }
         let region = MKCoordinateRegion(center: coordinate,
                                         latitudinalMeters: 2000,
                                         longitudinalMeters: 2000)
@@ -426,7 +426,7 @@ private extension HomeController {
     
     func setCustomRegion(withType type: AnnotationType, coordinates: CLLocationCoordinate2D) {
         let region = CLCircularRegion(center: coordinates, radius: 25, identifier: type.rawValue)
-        locationManager?.startMonitoring(for: region)
+        locationManager.startMonitoring(for: region)
     }
     
     func zoomForActiveTrip(withDriverUid uid: String) {
@@ -512,20 +512,20 @@ extension HomeController: CLLocationManagerDelegate {
     }
     
     func enableLocationServices() {
-        locationManager?.delegate = self
+        locationManager.delegate = self
         
         switch CLLocationManager.authorizationStatus() {
         case .notDetermined:
             print("DEBUG: Not determined..")
-            locationManager?.requestWhenInUseAuthorization()
+            locationManager.requestWhenInUseAuthorization()
         case .restricted, .denied:
             break
         case .authorizedAlways:
             print("DEBUG: Auth always..")
         case .authorizedWhenInUse:
             print("DEBUG: Auth when in use..")
-            locationManager?.startUpdatingLocation()
-            locationManager?.desiredAccuracy = kCLLocationAccuracyBest
+            locationManager.startUpdatingLocation()
+            locationManager.desiredAccuracy = kCLLocationAccuracyBest
         @unknown default:
             break
         }
@@ -616,7 +616,7 @@ extension HomeController: UITableViewDelegate, UITableViewDataSource {
 
 extension HomeController: RideActionViewDelegate {
     func uploadTrip(_ view: RideActionView) {
-        guard let pickupCoordinates = locationManager?.location?.coordinate else { return }
+        guard let pickupCoordinates = locationManager.location?.coordinate else { return }
         guard let destinationCoordinates = view.destination?.coordinate else { return }
         
         shouldPresentLoadingView(true, message: "Finding you a ride..")
