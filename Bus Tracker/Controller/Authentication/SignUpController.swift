@@ -10,12 +10,14 @@
 import UIKit
 import Firebase
 import GeoFire
+import CoreLocation
 
-class SignUpController: UIViewController {
+class SignUpController: UIViewController, CLLocationManagerDelegate {
     
     // MARK: - Properties
-    
-    private var location = LocationHandler.shared.locationManager.location
+        
+    var locationManager = CLLocationManager()
+    var location: CLLocation!
     
     private let titleLabel: UILabel = {
         let label = UILabel()
@@ -43,10 +45,36 @@ class SignUpController: UIViewController {
         return view
     }()
     
+    private lazy var busnumberContainerView: UIView = {
+        let view = UIView().inputContainerView(image: #imageLiteral(resourceName: "chevron-sign-to-right"), textField: busnumberTextField)
+        view.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        return view
+    }()
+    
+    
+    private lazy var busRegistrationContainerView: UIView = {
+        let view = UIView().inputContainerView(image: #imageLiteral(resourceName: "chevron-sign-to-right"), textField: busRegistrationTextField)
+        view.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        return view
+    }()
+    
+    private lazy var busMakeContainerView: UIView = {
+        let view = UIView().inputContainerView(image: #imageLiteral(resourceName: "chevron-sign-to-right"), textField: busMakeTextField)
+        view.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        return view
+    }()
+    
+    private lazy var busColorContainerView: UIView = {
+        let view = UIView().inputContainerView(image: #imageLiteral(resourceName: "chevron-sign-to-right"), textField: busColorTextField)
+        view.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        return view
+    }()
+    
+    
     private lazy var accountTypeContainerView: UIView = {
         let view = UIView().inputContainerView(image: #imageLiteral(resourceName: "ic_account_box_white_2x"),
                                                segmentedControl: accountTypeSegmentedControl)
-        view.heightAnchor.constraint(equalToConstant: 80).isActive = true
+        view.heightAnchor.constraint(equalToConstant: 60).isActive = true
         return view
     }()
     
@@ -65,6 +93,27 @@ class SignUpController: UIViewController {
                                        isSecureTextEntry: true)
     }()
     
+    private let busnumberTextField: UITextField = {
+        return UITextField().textField(withPlaceholder: "Bus Number (Only for drivers)",
+                                       isSecureTextEntry: false)
+    }()
+    
+    private let busRegistrationTextField: UITextField = {
+        return UITextField().textField(withPlaceholder: "Bus Registration (Only for drivers)",
+                                       isSecureTextEntry: false)
+    }()
+    
+    private let busMakeTextField: UITextField = {
+        return UITextField().textField(withPlaceholder: "Bus Make (Only for drivers)",
+                                       isSecureTextEntry: false)
+    }()
+    
+    private let busColorTextField: UITextField = {
+        return UITextField().textField(withPlaceholder: "Bus Color (Only for drivers)",
+                                       isSecureTextEntry: false)
+    }()
+    
+    
     private let accountTypeSegmentedControl: UISegmentedControl = {
         let sc = UISegmentedControl(items: ["Rider", "Driver"])
         sc.backgroundColor = .backgroundColor
@@ -72,6 +121,7 @@ class SignUpController: UIViewController {
         sc.selectedSegmentIndex = 0
         return sc
     }()
+    
     
     private let signUpButton: AuthButton = {
         let button = AuthButton(type: .system)
@@ -85,7 +135,7 @@ class SignUpController: UIViewController {
         let button = UIButton(type: .system)
         let attributedTitle = NSMutableAttributedString(string: "Already have an account?  ", attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16), NSAttributedString.Key.foregroundColor: UIColor.lightGray])
         
-        attributedTitle.append(NSAttributedString(string: "Sign Up", attributes: [NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 16), NSAttributedString.Key.foregroundColor: UIColor.mainBlueTint]))
+        attributedTitle.append(NSAttributedString(string: "Log In", attributes: [NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 16), NSAttributedString.Key.foregroundColor: UIColor.mainBlueTint]))
         
         button.addTarget(self, action: #selector(handleShowLogin), for: .touchUpInside)
         
@@ -97,16 +147,49 @@ class SignUpController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        // Get Location Permission one time only
+        locationManager.requestWhenInUseAuthorization()
+        // Need to update location and get location data in locationManager object with delegate
+        locationManager.startUpdatingLocation()
+        locationManager.startMonitoringSignificantLocationChanges()
+
+        
         configureUI()
         
     }
     
     // MARK: - Selectors
     
+    func authorizelocationstates(){
+            if CLLocationManager.authorizationStatus() == .authorizedWhenInUse {
+                location = locationManager.location
+                print("DEBUG: Driver coodinates are \(location!)")
+            }
+            else{
+                // Note : This function is overlap permission
+                  locationManager.requestWhenInUseAuthorization()
+                  authorizelocationstates()
+            }
+        }
+       
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+            locationManager = manager
+            // Only called when variable have location data
+            authorizelocationstates()
+        }
+        
+    
     @objc func handleSignUp() {
         guard let email = emailTextField.text else { return }
         guard let password = passwordTextField.text else { return }
         guard let fullname = fullnameTextField.text else { return }
+        guard let busnumber = busnumberTextField.text else { return }
+        guard let busRegistration = busRegistrationTextField.text else { return }
+        guard let busMake = busMakeTextField.text else { return }
+        guard let busColor = busColorTextField.text else { return }
+    
         let accountTypeIndex = accountTypeSegmentedControl.selectedSegmentIndex
                 
         Auth.auth().createUser(withEmail: email, password: password) { (result, error) in
@@ -119,15 +202,22 @@ class SignUpController: UIViewController {
             
             let values = ["email": email,
                           "fullname": fullname,
+                          "busnumber": busnumber,
+                          "busRegistration": busRegistration,
+                          "busMake": busMake,
+                          "busColor": busColor,
                           "accountType": accountTypeIndex] as [String : Any]
             
+            
             if accountTypeIndex == 1 {
+                
                 let geofire = GeoFire(firebaseRef: REF_DRIVER_LOCATIONS)
-                guard let location = self.location else { return }
+                guard let location = self.locationManager.location else { return }
                 
                 geofire.setLocation(location, forKey: uid, withCompletionBlock: { (error) in
                     self.uploadUserDataAndShowHomeController(uid: uid, values: values)
                 })
+              
             }
             
             self.uploadUserDataAndShowHomeController(uid: uid, values: values)
@@ -159,7 +249,13 @@ class SignUpController: UIViewController {
                                                    fullnameContainerView,
                                                    passwordContainerView,
                                                    accountTypeContainerView,
+                                                   busnumberContainerView,
+                                                   busRegistrationContainerView,
+                                                   busMakeContainerView,
+                                                   busColorContainerView,
                                                    signUpButton])
+        
+        
         stack.axis = .vertical
         stack.distribution = .fillProportionally
         stack.spacing = 24
@@ -168,6 +264,8 @@ class SignUpController: UIViewController {
         stack.anchor(top: titleLabel.bottomAnchor, left: view.leftAnchor,
                      right: view.rightAnchor, paddingTop: 40, paddingLeft: 16,
                      paddingRight: 16)
+        
+        
         
         view.addSubview(alreadyHaveAccountButton)
         alreadyHaveAccountButton.centerX(inView: view)

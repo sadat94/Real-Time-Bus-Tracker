@@ -22,6 +22,10 @@ struct User {
     let uid: String
     var homeLocation: String?
     var workLocation: String?
+    var busnumber: String?
+    var busRegistration: String?
+    var busMake: String?
+    var busColor: String?
     
     var firstInitial: String { return String(fullname.prefix(1)) }
     
@@ -29,6 +33,11 @@ struct User {
         self.uid = uid
         self.fullname = dictionary["fullname"] as? String ?? ""
         self.email = dictionary["email"] as? String ?? ""
+        self.busnumber = dictionary["busnumber"] as? String ?? ""
+        self.busRegistration = dictionary["busRegistration"] as? String ?? ""
+        self.busMake = dictionary["busMake"] as? String ?? ""
+        self.busColor = dictionary["busColor"] as? String ?? ""
+
         
         if let home = dictionary["homeLocation"] as? String {
             self.homeLocation = home
@@ -43,3 +52,4 @@ struct User {
         }
     }
 }
+
